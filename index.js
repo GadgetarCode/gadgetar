@@ -29,9 +29,9 @@ app.use(function (req, res, next) {
 
 app.post("/find-products", (req, res) => {
   const { skus } = req.body;
-  if (!Array.isArray(skus)) {
-    return res.status(400).json({ error: "Invalid data format. 'skus' must be an array." });
-  }
+ // if (!Array.isArray(skus)) {
+   // return res.status(400).json({ error: "Invalid data format. 'skus' must be an array." });
+ // }
 
   const options = {
     method: 'GET',
