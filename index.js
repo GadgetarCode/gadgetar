@@ -65,7 +65,7 @@ app.post("/find-products", async (req, res) => {
             id: sku.id,
             product: sku.fieldData.product,
             img: sku.fieldData['main-image'].url,
-            tag: product.fieldData['teg-2'],
+            // tag: product.fieldData['teg-2'],
           }));
 
         return relevantSkus;
