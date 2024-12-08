@@ -42,15 +42,16 @@ app.post("/find-products", (req, res) => {
     }
   };
 
-  axios
+   axios
     .request(options)
     .then(function (response) {
       const allProducts = response.data.items;
-      const matchingProducts = allProducts.filter((product) => 
-        skus.includes(product.sku)
-      );
+      const matchingProducts = allProducts.filter((product) => {
+        const productSkus = product.skus.map(sku => sku.sku);
+        return skus.some(sku => productSkus.includes(sku));
+      });
       const responseData = matchingProducts.map((product) => ({
-        name: product.name,
+        name: product.fieldData.name,
         slug: product.slug,
       }));
       res.json(responseData);
