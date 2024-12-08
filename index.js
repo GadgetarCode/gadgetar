@@ -36,19 +36,27 @@ app.post("/find-products", async (req, res) => {
   try {
     let allProducts = [];
     let currentPage = 1;
+    let hasNextPage = true;  // Флаг для перевірки, чи є наступна сторінка
 
-    while (true) {
-      const paginatedOptions = { ...options, params: { page: currentPage } };
+    // Запит до API з пагінацією
+    while (hasNextPage) {
+      const paginatedOptions = { 
+        ...options, 
+        params: { page: currentPage }  // передача параметру сторінки
+      };
+      
       const response = await axios.request(paginatedOptions);
       const products = response.data.items;
-      allProducts = [...allProducts, ...products];
+      allProducts = [...allProducts, ...products];  // Додаємо отримані продукти
 
-      if (response.data._next) {
-        currentPage++;
-      } else {
-        break;
+      // Якщо є наступна сторінка, збільшуємо номер сторінки
+      hasNextPage = Boolean(response.data._next); 
+      if (hasNextPage) {
+        currentPage++; // Інкрементуємо сторінку для наступного запиту
       }
     }
+
+    // Фільтрація продуктів
     const matchingProducts = allProducts
       .filter((product) => 
         product.skus.some((sku) => skus_n.includes(sku.fieldData.sku))
