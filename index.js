@@ -37,7 +37,7 @@ app.post("/find-products", (req, res) => {
     .request(options)
     .then(function (response) {
       const allProducts = response.data.items;
-
+      
       const matchingProducts = allProducts
         .filter((product) => 
           product.skus.some((sku) => skus_n.includes(sku.fieldData.sku))
