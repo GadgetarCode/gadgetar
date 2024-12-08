@@ -5,7 +5,7 @@ const PORT = process.env.PORT || 5500;
 const app = express();
 
 const client = new WebflowClient({
-accessToken: "f4527fb9661b133b54c7105287522dfd5dd3bb2dc66204ed76bc709a4b081ead",
+accessToken: "d11f82236d18264c45d33fda2857f04c96e14771134529aac94c9fb491b5dbcb",
 });
 const siteID = '66fd1c590193b201914b0d7c';
 
