@@ -21,8 +21,10 @@ app.use(function (req, res, next) {
     next();
   });
 
+const axios = require('axios');
+
 app.post("/find-products", (req, res) => {
-  const { skus_n } = req.body;
+  const { skus_n } = req.body; // отримуємо SKUs з тіла запиту
   const options = {
     method: 'GET',
     url: 'https://api.webflow.com/v2/sites/66fd1c590193b201914b0d7c/products',
@@ -36,22 +38,16 @@ app.post("/find-products", (req, res) => {
     .request(options)
     .then(function (response) {
       const allProducts = response.data.items;
-
-      const matchingProducts = allProducts.filter((skus.fieldData) => 
-        skus_n.includes(skus.fieldData.sku)
+      const matchingProducts = allProducts.filter((product) => 
+        product.skus.some((sku) => skus_n.includes(sku.fieldData.sku))
       );
-
-      // const responseData = matchingProducts.map((product) => ({
-        // name: product.name,
-        // slug: product.slug,
-      // }));
-
-      res.json(matchingProducts); // Send the filtered products as the response
+      res.json(matchingProducts);
     })
     .catch(function (error) {
       console.error("Error fetching products:", error);
       res.status(500).json({ error: "Internal server error." });
     });
 });
+
 
 app.listen(PORT, () => console.log("Server on " + PORT))
