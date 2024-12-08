@@ -22,6 +22,7 @@ app.use(function (req, res, next) {
   });
 
 app.post("/find-products", (req, res) => {
+  const { skus_n } = req.body;
   const options = {
     method: 'GET',
     url: 'https://api.webflow.com/v2/sites/66fd1c590193b201914b0d7c/products',
@@ -35,7 +36,17 @@ app.post("/find-products", (req, res) => {
     .request(options)
     .then(function (response) {
       const allProducts = response.data.items;
-      res.json(allProducts);
+
+      const matchingProducts = allProducts.filter((skus.fieldData) => 
+        skus_n.includes(skus.fieldData.sku)
+      );
+
+      // const responseData = matchingProducts.map((product) => ({
+        // name: product.name,
+        // slug: product.slug,
+      // }));
+
+      res.json(matchingProducts); // Send the filtered products as the response
     })
     .catch(function (error) {
       console.error("Error fetching products:", error);
