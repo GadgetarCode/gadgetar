@@ -51,7 +51,7 @@ app.post("/find-products", (req, res) => {
             price: sku.fieldData.price.value,
             sku: sku.fieldData.sku,
             id: sku.id,
-            product: sku.product,
+            product: sku.fieldData.product,
           }));
 
           return relevantSkus;
