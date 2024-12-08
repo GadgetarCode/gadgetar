@@ -26,7 +26,7 @@ app.post("/find-products", (req, res) => {
   const { skus_n } = req.body;
   const options = {
     method: 'GET',
-    url: 'https://api.webflow.com/v2/sites/66fd1c590193b201914b0d7c/products?limit=10000',
+    url: 'https://api.webflow.com/v2/sites/66fd1c590193b201914b0d7c/products?offset=100',
     headers: {
       accept: 'application/json',
       authorization: 'Bearer d11f82236d18264c45d33fda2857f04c96e14771134529aac94c9fb491b5dbcb',
