@@ -1,13 +1,7 @@
-// import { WebflowClient } from "webflow-api";
 import express from "express";
 import axios from "axios";
 const PORT = process.env.PORT || 5500;
 const app = express();
-
-// const client = new WebflowClient({
-// accessToken: "d11f82236d18264c45d33fda2857f04c96e14771134529aac94c9fb491b5dbcb",
-// });
-// const siteID = '66fd1c590193b201914b0d7c';
 
 app.use(
   express.json({
