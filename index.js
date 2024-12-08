@@ -22,7 +22,7 @@ app.use(function (req, res, next) {
   });
 
 
-app.post("/find-products", (req, res) => {
+app.post("/find-products", async (req, res) => {
   const { skus_n } = req.body;
   const options = {
     method: 'GET',
@@ -33,36 +33,47 @@ app.post("/find-products", (req, res) => {
     }
   };
 
-  axios
-    .request(options)
-    .then(function (response) {
-      const allProducts = response.data.items;
+  try {
+    let allProducts = [];
+    let currentPage = 1;
 
-      const matchingProducts = allProducts
-        .filter((product) => 
-          product.skus.some((sku) => skus_n.includes(sku.fieldData.sku))
-        )
-        .map((product) => {
-          const relevantSkus = product.skus.filter((sku) =>
-            skus_n.includes(sku.fieldData.sku)
-          ).map((sku) => ({
-            name: sku.fieldData.name,
-            slug: sku.fieldData.slug,
-            price: sku.fieldData.price.value,
-            sku: sku.fieldData.sku,
-            id: sku.id,
-            product: sku.fieldData.product,
-          }));
+    while (true) {
+      const paginatedOptions = { ...options, params: { page: currentPage } };
+      const response = await axios.request(paginatedOptions);
+      const products = response.data.items;
+      allProducts = [...allProducts, ...products];
 
-          return relevantSkus;
-        });
+      if (response.data._next) {
+        currentPage++;
+      } else {
+        break;
+      }
+    }
+    const matchingProducts = allProducts
+      .filter((product) => 
+        product.skus.some((sku) => skus_n.includes(sku.fieldData.sku))
+      )
+      .map((product) => {
+        const relevantSkus = product.skus.filter((sku) =>
+          skus_n.includes(sku.fieldData.sku)
+        ).map((sku) => ({
+          name: sku.fieldData.name,
+          slug: sku.fieldData.slug,
+          price: sku.fieldData.price.value,
+          sku: sku.fieldData.sku,
+          id: sku.id,
+          product: sku.fieldData.product,
+        }));
 
-      res.json(matchingProducts);
-    })
-    .catch(function (error) {
-      console.error("Error fetching products:", error);
-      res.status(500).json({ error: "Internal server error." });
-    });
+        return relevantSkus;
+      });
+
+    res.json(matchingProducts);
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
 });
+
 
 app.listen(PORT, () => console.log("Server on " + PORT))
