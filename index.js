@@ -21,7 +21,6 @@ app.use(function (req, res, next) {
     next();
   });
 
-const axios = require('axios');
 
 app.post("/find-products", (req, res) => {
   const { skus_n } = req.body; // отримуємо SKUs з тіла запиту
