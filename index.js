@@ -22,30 +22,42 @@ app.use(function (req, res, next) {
   });
 
 
-app.post("/find-products", (req, res) => {
+app.post("/find-products", async (req, res) => {
   const { skus_n } = req.body;
-  const options = {
-    method: 'GET',
-    url: 'https://api.webflow.com/v2/sites/66fd1c590193b201914b0d7c/products?offset=100',
-    headers: {
-      accept: 'application/json',
-      authorization: 'Bearer d11f82236d18264c45d33fda2857f04c96e14771134529aac94c9fb491b5dbcb',
-    }
+  const headers = {
+    accept: "application/json",
+    authorization: "Bearer d11f82236d18264c45d33fda2857f04c96e14771134529aac94c9fb491b5dbcb",
   };
 
-  axios
-    .request(options)
-    .then(function (response) {
-      const allProducts = response.data.items;
-      
-      const matchingProducts = allProducts
-        .filter((product) => 
-          product.skus.some((sku) => skus_n.includes(sku.fieldData.sku))
-        )
-        .map((product) => {
-          const relevantSkus = product.skus.filter((sku) =>
-            skus_n.includes(sku.fieldData.sku)
-          ).map((sku) => ({
+  let allProducts = [];
+  let offset = 0;
+  const limit = 100; // Максимальна кількість елементів у запиті
+
+  try {
+    while (true) {
+      const response = await axios.get(
+        `https://api.webflow.com/v2/sites/66fd1c590193b201914b0d7c/products?offset=${offset}`,
+        { headers }
+      );
+
+      const products = response.data.items;
+      allProducts = allProducts.concat(products);
+
+      // Якщо повернута кількість продуктів менше `limit`, це означає, що ми отримали всі елементи
+      if (products.length < limit) break;
+
+      offset += limit;
+    }
+
+    // Фільтрація продуктів за SKU
+    const matchingProducts = allProducts
+      .filter((product) =>
+        product.skus.some((sku) => skus_n.includes(sku.fieldData.sku))
+      )
+      .map((product) => {
+        const relevantSkus = product.skus
+          .filter((sku) => skus_n.includes(sku.fieldData.sku))
+          .map((sku) => ({
             name: sku.fieldData.name,
             slug: sku.fieldData.slug,
             price: sku.fieldData.price.value,
@@ -54,16 +66,16 @@ app.post("/find-products", (req, res) => {
             product: sku.fieldData.product,
           }));
 
-          return relevantSkus;
-        });
+        return relevantSkus;
+      });
 
-      res.json(matchingProducts);
-    })
-    .catch(function (error) {
-      console.error("Error fetching products:", error);
-      res.status(500).json({ error: "Internal server error." });
-    });
+    res.json(matchingProducts);
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
 });
+
 
 
 app.listen(PORT, () => console.log("Server on " + PORT))
