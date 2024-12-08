@@ -31,7 +31,7 @@ app.post("/find-products", async (req, res) => {
 
   let allProducts = [];
   let offset = 0;
-  const limit = 100; // Максимальна кількість елементів у запиті
+  const limit = 100;
 
   try {
     while (true) {
@@ -43,13 +43,10 @@ app.post("/find-products", async (req, res) => {
       const products = response.data.items;
       allProducts = allProducts.concat(products);
 
-      // Якщо повернута кількість продуктів менше `limit`, це означає, що ми отримали всі елементи
       if (products.length < limit) break;
 
       offset += limit;
     }
-
-    // Фільтрація продуктів за SKU
     const matchingProducts = allProducts
       .filter((product) =>
         product.skus.some((sku) => skus_n.includes(sku.fieldData.sku))
@@ -66,19 +63,10 @@ app.post("/find-products", async (req, res) => {
             product: sku.fieldData.product,
             img: sku.fieldData['main-image'].url,
           }));
-
-        // Додаємо тег до результату для кожного продукту
-        const teg2 = product.product;
-
-          
-          
-          
-          // product.fieldData['teg-2'];  // Отримуємо тег із продукту
-
-        // Повертаємо відповідний результат разом із тегом
+        const tag = product.product.fieldData['teg-2'];
         return {
-          teg2: teg2, // додаємо тег
-          skus: relevantSkus // додаємо відфільтровані SKU
+          tag: tag,
+          skus: relevantSkus
         };
       });
 
@@ -88,8 +76,6 @@ app.post("/find-products", async (req, res) => {
     res.status(500).json({ error: "Internal server error." });
   }
 });
-
-
 
 
 app.listen(PORT, () => console.log("Server on " + PORT))
