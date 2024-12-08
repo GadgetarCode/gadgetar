@@ -28,11 +28,6 @@ app.use(function (req, res, next) {
   });
 
 app.post("/find-products", (req, res) => {
-  const { ids } = req.body;
- // if (!Array.isArray(skus)) {
-   // return res.status(400).json({ error: "Invalid data format. 'skus' must be an array." });
- // }
-
   const options = {
     method: 'GET',
     url: 'https://api.webflow.com/v2/sites/66fd1c590193b201914b0d7c/products',
@@ -42,28 +37,15 @@ app.post("/find-products", (req, res) => {
     }
   };
 
-   axios
+  axios
     .request(options)
     .then(function (response) {
       const allProducts = response.data.items;
-
-      
-
-    //  const matchingProducts = allProducts.filter((product) => 
-     //   skus.includes(product.sku)
-//      );
-
-      // 6752f09238482a35158463ff
-
-//      const responseData = matchingProducts.map((product) => ({
-//        name: product.name,
-//        slug: product.slug,
-      }));
       res.json(allProducts);
     })
-   // .catch(function (error) {
-   //   console.error("Error fetching products:", error);
-   //   res.status(500).json({ error: "Internal server error." });
+    .catch(function (error) {
+      console.error("Error fetching products:", error);
+      res.status(500).json({ error: "Internal server error." });
     });
 });
 
