@@ -37,9 +37,24 @@ app.post("/find-products", (req, res) => {
     .request(options)
     .then(function (response) {
       const allProducts = response.data.items;
-      const matchingProducts = allProducts.filter((product) => 
-        product.skus.some((sku) => skus_n.includes(sku.fieldData.sku))
-      );
+
+      const matchingProducts = allProducts
+        .filter((product) => 
+          product.skus.some((sku) => skus_n.includes(sku.fieldData.sku))
+        )
+        .map((product) => {
+          const relevantSkus = product.skus.filter((sku) =>
+            skus_n.includes(sku.fieldData.sku)
+          ).map((sku) => ({
+            name: sku.fieldData.name,
+            slug: sku.fieldData.slug,
+            price: sku.fieldData.price.value,
+            sku: sku.fieldData.sku,
+          }));
+
+          return relevantSkus;
+        });
+
       res.json(matchingProducts);
     })
     .catch(function (error) {
@@ -47,6 +62,5 @@ app.post("/find-products", (req, res) => {
       res.status(500).json({ error: "Internal server error." });
     });
 });
-
 
 app.listen(PORT, () => console.log("Server on " + PORT))
