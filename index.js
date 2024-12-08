@@ -65,10 +65,16 @@ app.post("/find-products", async (req, res) => {
             id: sku.id,
             product: sku.fieldData.product,
             img: sku.fieldData['main-image'].url,
-            tag: product.fieldData['teg-2'],
           }));
 
-        return relevantSkus;
+        // Додаємо тег до результату для кожного продукту
+        const teg2 = product.fieldData['teg-2'];  // Отримуємо тег із продукту
+
+        // Повертаємо відповідний результат разом із тегом
+        return {
+          teg2: teg2, // додаємо тег
+          skus: relevantSkus // додаємо відфільтровані SKU
+        };
       });
 
     res.json(matchingProducts);
@@ -77,6 +83,7 @@ app.post("/find-products", async (req, res) => {
     res.status(500).json({ error: "Internal server error." });
   }
 });
+
 
 
 
