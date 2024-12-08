@@ -28,7 +28,7 @@ app.use(function (req, res, next) {
   });
 
 app.post("/find-products", (req, res) => {
-  const { skus } = req.body;
+  const { ids } = req.body;
  // if (!Array.isArray(skus)) {
    // return res.status(400).json({ error: "Invalid data format. 'skus' must be an array." });
  // }
@@ -46,19 +46,24 @@ app.post("/find-products", (req, res) => {
     .request(options)
     .then(function (response) {
       const allProducts = response.data.items;
-      const matchingProducts = allProducts.filter((product) => {
-        const productSkus = product.skus.map(sku => sku.sku);
-        return skus.some(sku => productSkus.includes(sku));
-      });
-      const responseData = matchingProducts.map((product) => ({
-        name: product.fieldData.name,
-        slug: product.slug,
+
+      
+
+    //  const matchingProducts = allProducts.filter((product) => 
+     //   skus.includes(product.sku)
+//      );
+
+      // 6752f09238482a35158463ff
+
+//      const responseData = matchingProducts.map((product) => ({
+//        name: product.name,
+//        slug: product.slug,
       }));
-      res.json(responseData);
+      res.json(allProducts);
     })
-    .catch(function (error) {
-      console.error("Error fetching products:", error);
-      res.status(500).json({ error: "Internal server error." });
+   // .catch(function (error) {
+   //   console.error("Error fetching products:", error);
+   //   res.status(500).json({ error: "Internal server error." });
     });
 });
 
