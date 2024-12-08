@@ -68,7 +68,7 @@ app.post("/find-products", async (req, res) => {
           }));
 
         // Додаємо тег до результату для кожного продукту
-        const teg2 = product.skus.filter((sku) => skus_n.includes(sku.fieldData.sku));
+        const teg2 = product.skus.filter((sku) => skus_n.includes(sku));
 
           
           
