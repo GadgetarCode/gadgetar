@@ -81,6 +81,7 @@ app.post("/find-products", async (req, res) => {
       if (relevantSkus.length > 0) {
         matchingProducts.push({
           tag: product.product.fieldData['teg-2'],
+          oprice: product.product.fieldData['stara-cina'],
           skus: relevantSkus,
         });
       }
