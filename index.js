@@ -34,6 +34,7 @@ app.post("/find-products", async (req, res) => {
   const limit = 100;
 
   try {
+    // Отримання всіх продуктів
     while (true) {
       const response = await axios.get(
         `https://api.webflow.com/v2/sites/66fd1c590193b201914b0d7c/products?offset=${offset}`,
@@ -47,14 +48,24 @@ app.post("/find-products", async (req, res) => {
 
       offset += limit;
     }
-    const matchingProducts = allProducts
-      .filter((product) =>
-        product.skus.some((sku) => skus_n.includes(sku.fieldData.sku))
-      )
-      .map((product) => {
-        const relevantSkus = product.skus
-          .filter((sku) => skus_n.includes(sku.fieldData.sku))
-          .map((sku) => ({
+
+    // Фільтруємо та отримуємо відповідні продукти
+    const matchingProducts = [];
+    for (const product of allProducts) {
+      const relevantSkus = [];
+
+      for (const sku of product.skus) {
+        if (skus_n.includes(sku.fieldData.sku)) {
+          // Додатковий запит для отримання кількості продукту
+          const inventoryResponse = await axios.get(
+            `https://api.webflow.com/v2/collections/66fd1c590193b201914b0dea/items/${sku.id}/inventory`,
+            { headers }
+          );
+
+          const quantity = inventoryResponse.data.quantity;
+
+          // Формування інформації про SKU
+          relevantSkus.push({
             name: sku.fieldData.name,
             slug: sku.fieldData.slug,
             price: sku.fieldData.price.value,
@@ -62,13 +73,18 @@ app.post("/find-products", async (req, res) => {
             id: sku.id,
             product: sku.fieldData.product,
             img: sku.fieldData['main-image'].url,
-          }));
-        const tag = product.product.fieldData['teg-2'];
-        return {
-          tag: tag,
-          skus: relevantSkus
-        };
-      });
+            quantity: quantity, // Додаємо кількість
+          });
+        }
+      }
+
+      if (relevantSkus.length > 0) {
+        matchingProducts.push({
+          tag: product.product.fieldData['teg-2'],
+          skus: relevantSkus,
+        });
+      }
+    }
 
     res.json(matchingProducts);
   } catch (error) {
@@ -76,6 +92,7 @@ app.post("/find-products", async (req, res) => {
     res.status(500).json({ error: "Internal server error." });
   }
 });
+
 
 
 app.listen(PORT, () => console.log("Server on " + PORT))
