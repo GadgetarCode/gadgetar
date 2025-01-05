@@ -140,15 +140,20 @@ app.get("/all-products", async (req, res) => {
     accept: "application/json",
     authorization: "Bearer d11f82236d18264c45d33fda2857f04c96e14771134529aac94c9fb491b5dbcb",
   };
+
   let allProducts = [];
+  let allCategories = [];
   let offset = 0;
   const limit = 100;
+
   try {
+    // Отримуємо всі продукти
     while (true) {
       const response = await axios.get(
         `https://api.webflow.com/v2/sites/66fd1c590193b201914b0d7c/products?offset=${offset}`,
         { headers }
       );
+
       const products = response.data.items;
       const filteredProducts = products.filter((item) => !item.product.isArchived);
       const selectedFields = filteredProducts.map((item) => {
@@ -158,16 +163,36 @@ app.get("/all-products", async (req, res) => {
           sku: sku.fieldData.sku || sku.id,
         }));
       }).flat();
+
       allProducts = allProducts.concat(selectedFields);
+
       if (products.length < limit) break;
       offset += limit;
     }
-    res.status(200).json(allProducts);
+
+    // Отримуємо всі категорії
+    const categoriesResponse = await axios.get(
+      `https://api.webflow.com/v2/sites/66fd1c590193b201914b0d7c/categories`,
+      { headers }
+    );
+
+    allCategories = categoriesResponse.data.items.map((category) => ({
+      id: category.id,
+      name: category.name,
+      slug: category.slug,
+    }));
+
+    // Відправляємо продукти та категорії у відповідь
+    res.status(200).json({
+      products: allProducts,
+      categories: allCategories,
+    });
   } catch (error) {
-    console.error("Помилка отримання продуктів із Webflow:", error.message);
-    res.status(500).json({ error: "Не вдалося отримати продукти." });
+    console.error("Помилка отримання даних із Webflow:", error.message);
+    res.status(500).json({ error: "Не вдалося отримати дані." });
   }
 });
+
 
 // ----------------
 
