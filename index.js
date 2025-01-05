@@ -138,36 +138,31 @@ app.post("/comp-products", async (req, res) => {
 app.get("/all-products", async (req, res) => {
   const headers = {
     accept: "application/json",
-    authorization: "Bearer d11f82236d18264c45d33fda2857f04c96e14771134529aac94c9fb491b5dbcb", // Замініть на ваш токен Webflow
+    authorization: "Bearer d11f82236d18264c45d33fda2857f04c96e14771134529aac94c9fb491b5dbcb",
   };
-
   let allProducts = [];
   let offset = 0;
   const limit = 100;
-
   try {
     while (true) {
-      // Виклик API Webflow для отримання продуктів
       const response = await axios.get(
         `https://api.webflow.com/v2/sites/66fd1c590193b201914b0d7c/products?offset=${offset}`,
         { headers }
       );
-
-      const products = response.data.items; // Отримані продукти
-
-      // Фільтрування за isArchived === false
+      const products = response.data.items;
       const filteredProducts = products.filter((item) => !item.product.isArchived);
-
-      // Додавання відфільтрованих продуктів до загального списку
-      allProducts = allProducts.concat(filteredProducts);
-
-      // Якщо продуктів менше за ліміт, значить, це остання сторінка
+      const selectedFields = filteredProducts.map((item) => {
+        return item.skus.map((sku) => ({
+          name: sku.fieldData.name,
+          slug: sku.fieldData.slug,
+          sku: sku.fieldData.sku || sku.id,
+        }));
+      }).flat();
+      allProducts = allProducts.concat(selectedFields);
       if (products.length < limit) break;
-
-      offset += limit; // Зміщення для наступної сторінки
+      offset += limit;
     }
-
-    res.status(200).json(allProducts); // Повернення відфільтрованих продуктів клієнту
+    res.status(200).json(allProducts);
   } catch (error) {
     console.error("Помилка отримання продуктів із Webflow:", error.message);
     res.status(500).json({ error: "Не вдалося отримати продукти." });
