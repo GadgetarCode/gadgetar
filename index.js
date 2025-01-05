@@ -140,20 +140,16 @@ app.get("/all-products", async (req, res) => {
     accept: "application/json",
     authorization: "Bearer d11f82236d18264c45d33fda2857f04c96e14771134529aac94c9fb491b5dbcb",
   };
-
   let allProducts = [];
   let allCategories = [];
   let offset = 0;
   const limit = 100;
-
   try {
-    // Отримуємо всі продукти
     while (true) {
       const response = await axios.get(
         `https://api.webflow.com/v2/sites/66fd1c590193b201914b0d7c/products?offset=${offset}`,
         { headers }
       );
-
       const products = response.data.items;
       const filteredProducts = products.filter((item) => !item.product.isArchived);
       const selectedFields = filteredProducts.map((item) => {
@@ -163,26 +159,26 @@ app.get("/all-products", async (req, res) => {
           sku: sku.fieldData.sku || sku.id,
         }));
       }).flat();
-
       allProducts = allProducts.concat(selectedFields);
-
       if (products.length < limit) break;
       offset += limit;
     }
-
-    // Отримуємо всі категорії
-    const categoriesResponse = await axios.get(
-      `https://api.webflow.com/v2/collections/66fd1c590193b201914b0da7/items/live`,
-      { headers }
-    );
-
-    // Форматуємо категорії, щоб отримати лише назву та слаг
-    allCategories = categoriesResponse.data.items.map((category) => ({
-      name: category.fieldData.name,
-      slug: category.fieldData.slug,
-    }));
-
-    // Відправляємо продукти та категорії у відповідь
+    offset = 0;
+    while (true) {
+      const categoriesResponse = await axios.get(
+        `https://api.webflow.com/v2/collections/66fd1c590193b201914b0da7/items/live?offset=${offset}`,
+        { headers }
+      );
+      const categories = categoriesResponse.data.items;
+      allCategories = allCategories.concat(
+        categories.map((category) => ({
+          name: category.fieldData.name,
+          slug: category.fieldData.slug,
+        }))
+      );
+      if (categories.length < limit) break;
+      offset += limit;
+    }
     res.status(200).json({
       products: allProducts,
       categories: allCategories,
@@ -192,8 +188,6 @@ app.get("/all-products", async (req, res) => {
     res.status(500).json({ error: "Не вдалося отримати дані." });
   }
 });
-
-
 
 // ----------------
 
