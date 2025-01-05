@@ -172,14 +172,14 @@ app.get("/all-products", async (req, res) => {
 
     // Отримуємо всі категорії
     const categoriesResponse = await axios.get(
-      `https://api.webflow.com/v2/sites/66fd1c590193b201914b0d7c/categories`,
+      `https://api.webflow.com/v2/collections/66fd1c590193b201914b0da7/items/live`,
       { headers }
     );
 
+    // Форматуємо категорії, щоб отримати лише назву та слаг
     allCategories = categoriesResponse.data.items.map((category) => ({
-      id: category.id,
-      name: category.name,
-      slug: category.slug,
+      name: category.fieldData.name,
+      slug: category.fieldData.slug,
     }));
 
     // Відправляємо продукти та категорії у відповідь
@@ -192,6 +192,7 @@ app.get("/all-products", async (req, res) => {
     res.status(500).json({ error: "Не вдалося отримати дані." });
   }
 });
+
 
 
 // ----------------
