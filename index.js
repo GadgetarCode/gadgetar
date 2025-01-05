@@ -152,14 +152,22 @@ app.get("/all-products", async (req, res) => {
         `https://api.webflow.com/v2/sites/66fd1c590193b201914b0d7c/products?offset=${offset}`,
         { headers }
       );
+
       const products = response.data.items; // Отримані продукти
-      allProducts = allProducts.concat(products);
+
+      // Фільтрування за isArchived === false
+      const filteredProducts = products.filter((item) => !item.product.isArchived);
+
+      // Додавання відфільтрованих продуктів до загального списку
+      allProducts = allProducts.concat(filteredProducts);
+
       // Якщо продуктів менше за ліміт, значить, це остання сторінка
       if (products.length < limit) break;
+
       offset += limit; // Зміщення для наступної сторінки
     }
 
-    res.status(200).json(allProducts); // Повернення всіх продуктів клієнту
+    res.status(200).json(allProducts); // Повернення відфільтрованих продуктів клієнту
   } catch (error) {
     console.error("Помилка отримання продуктів із Webflow:", error.message);
     res.status(500).json({ error: "Не вдалося отримати продукти." });
