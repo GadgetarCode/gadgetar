@@ -135,29 +135,34 @@ app.post("/comp-products", async (req, res) => {
 
 // ----------------
 
-app.post("/all-products", async (req, res) => {
+app.get("/all-products", async (req, res) => {
   const headers = {
     accept: "application/json",
-    authorization: "Bearer d11f82236d18264c45d33fda2857f04c96e14771134529aac94c9fb491b5dbcb",
+    authorization: "Bearer d11f82236d18264c45d33fda2857f04c96e14771134529aac94c9fb491b5dbcb", // Замініть на ваш токен Webflow
   };
+
   let allProducts = [];
   let offset = 0;
   const limit = 100;
+
   try {
     while (true) {
+      // Виклик API Webflow для отримання продуктів
       const response = await axios.get(
         `https://api.webflow.com/v2/sites/66fd1c590193b201914b0d7c/products?offset=${offset}`,
         { headers }
       );
-      const products = response.data.items;
+      const products = response.data.items; // Отримані продукти
       allProducts = allProducts.concat(products);
+      // Якщо продуктів менше за ліміт, значить, це остання сторінка
       if (products.length < limit) break;
-      offset += limit;
+      offset += limit; // Зміщення для наступної сторінки
     }
-    res.json(allProducts);
+
+    res.status(200).json(allProducts); // Повернення всіх продуктів клієнту
   } catch (error) {
-    console.error("Error fetching products:", error);
-    res.status(500).json({ error: "Internal server error." });
+    console.error("Помилка отримання продуктів із Webflow:", error.message);
+    res.status(500).json({ error: "Не вдалося отримати продукти." });
   }
 });
 
